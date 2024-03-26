@@ -45,3 +45,18 @@ Plan projektu:
 
 
 
+Gosia:
+- BSC
+- turbo kody
+- kody fontannowe
+
+Krysia:
+- Gilbert-Elliott
+- RS
+- LDPC
+
+Dominik:
+- powielanie bitów
+- BCH
+- sprawdzanie innych ;P
+
