@@ -3,7 +3,6 @@ package pl.pwr.ite.niduc.service.impl.channels;
 import java.util.Random;
 
 
-// BSC
 public class FinalBSC {
     private final double pOfError;
     private final double pOfBurst;
