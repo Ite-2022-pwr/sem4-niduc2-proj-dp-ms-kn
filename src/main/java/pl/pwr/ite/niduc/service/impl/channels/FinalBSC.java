@@ -3,10 +3,10 @@ package pl.pwr.ite.niduc.service.impl.channels;
 import java.util.Random;
 
 public class FinalBSC {
-    private double pOfError;
-    private double pOfBurst;
-    private double pOfCyclic;
-    private Random random;
+    private final double pOfError;
+    private final double pOfBurst;
+    private final double pOfCyclic;
+    private final Random random;
 
     public FinalBSC(double pOfError, double pOfBurst, double pOfCyclic) {
         this.pOfError = pOfError;
