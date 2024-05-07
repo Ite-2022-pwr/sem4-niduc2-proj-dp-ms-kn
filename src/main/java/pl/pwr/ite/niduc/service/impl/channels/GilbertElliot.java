@@ -1,4 +1,3 @@
-// Importowanie potrzebnych klas i interfejsów
 package pl.pwr.ite.niduc.service.impl.channels;
 
 import pl.pwr.ite.niduc.service.NumberGenerator;
