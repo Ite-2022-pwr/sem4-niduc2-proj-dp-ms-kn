@@ -119,28 +119,23 @@ public class Hamming {
         return result;
     }
 
-    public static List<Integer> correct(List<Integer> encodedMsg, List<Integer> syndrome) {
-        List<Integer> result = new ArrayList<>();
-
-        final int[][] transition = {
-                {1, 0, 0, 0, 0, 0, 0, 0},
-                {0, 1, 0, 0, 0, 0, 0, 0},
-                {0, 0, 1, 0, 0, 0, 0, 0},
-                {0, 0, 0, 1, 0, 0, 0, 0},
-                {1, 1, 0, 1, 0, 0, 0, 0},
-                {1, 0, 1, 1, 0, 0, 0, 0},
-                {0, 1, 1, 1, 0, 0, 0, 0},
-                {1, 1, 1, 1, 1, 1, 1, 0}
-        };
-
+    public static List<Integer> correct(List<Integer> msg, List<Integer> syndrome) {
         // Reshape the message into 8-bit chunks
         List<List<Integer>> msgChunks = new ArrayList<>();
-        for (int i = 0; i < encodedMsg.size(); i += 8) {
-            List<Integer> chunk = new ArrayList<>(encodedMsg.subList(i, Math.min(i + 8, encodedMsg.size())));
+        for (int i = 0; i < msg.size(); i += 8) {
+            List<Integer> chunk = new ArrayList<>(msg.subList(i, Math.min(i + 8, msg.size())));
             msgChunks.add(chunk);
         }
 
-        // Error correction
+        // Syndrom matrix
+        int[][] transition = {
+                {0, 1, 1, 1, 1, 0, 0, 0},
+                {1, 0, 1, 1, 0, 1, 0, 0},
+                {1, 1, 0, 1, 0, 0, 1, 0},
+                {1, 1, 1, 0, 0, 0, 0, 1}
+        };
+
+        List<Integer> result = new ArrayList<>();
         for (int synd = 0; synd < syndrome.size() / 4; synd++) {
             // If the syndrome is all zeros, there is no error
             boolean allZeros = true;
@@ -151,12 +146,13 @@ public class Hamming {
                 }
             }
             if (allZeros) {
-                result.addAll(msgChunks.get(synd));
+                for (int i = 0; i < 8; i++) {
+                    result.add(msgChunks.get(synd).get(i));
+                }
                 continue;
             }
 
             // Find the column corresponding to the error in the transition matrix
-            int errorColumn = -1;
             for (int col = 0; col < transition[0].length; col++) {
                 boolean isEqual = true;
                 for (int row = 0; row < transition.length; row++) {
@@ -166,24 +162,21 @@ public class Hamming {
                     }
                 }
                 if (isEqual) {
-                    errorColumn = col;
-                    break;
-                }
-            }
+                    // Correct the error - tutaj trzeba dopisac kod ktory bedzie poprawnie zmienial bity na wlasciwe w razie bledow przy transmisji
+                    for (int i = 0; i < 8; i++) {
+//                        int currentVal = msgChunks.get(synd).get(col * 8 + i);
+//                        int newVal = (currentVal + 1) % 2;
+//                        result.add(newVal);
 
-            if (errorColumn != -1) {
-                // Correct the error
-                for (int i = 0; i < 8; i++) {
-                    int correctedBit = (encodedMsg.get(synd * 8 + i) + transition[errorColumn][i]) % 2;
-                    result.add(correctedBit);
+                    }
                 }
-            } else {
-                // No error correction possible, just add the original chunk
-                result.addAll(msgChunks.get(synd));
             }
         }
         return result;
     }
+
+
+
 
 
 
