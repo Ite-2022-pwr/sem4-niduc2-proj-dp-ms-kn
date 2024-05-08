@@ -1,15 +1,15 @@
 package pl.pwr.ite.niduc.service.impl.codes;
 
 import pl.pwr.ite.niduc.service.impl.channels.BSC;
+import pl.pwr.ite.niduc.service.impl.channels.GilbertElliot;
 import pl.pwr.ite.niduc.service.impl.generator.NumberGeneratorImpl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Hamming {
 
+    // Metoda zamieniająca
     public static List<Integer> strToBin(String string) {
         List<Integer> ret = new ArrayList<>();
         for (char c : string.toCharArray()) {
@@ -119,15 +119,30 @@ public class Hamming {
         return result;
     }
 
-    public static List<Integer> correct(List<Integer> msg, List<Integer> syndrome) {
+
+
+    private static List<Integer> correct(List<Integer> syndrome, List<Integer> msg) {
         // Reshape the message into 8-bit chunks
-        List<List<Integer>> msgChunks = new ArrayList<>();
-        for (int i = 0; i < msg.size(); i += 8) {
-            List<Integer> chunk = new ArrayList<>(msg.subList(i, Math.min(i + 8, msg.size())));
-            msgChunks.add(chunk);
+        int[][] msgChunks = new int[(msg.size() + 7) / 8][8];
+        for (int i = 0; i < msg.size(); i++) {
+            msgChunks[i / 8][i % 8] = msg.get(i);
         }
 
-        // Syndrom matrix
+        System.out.println(syndrome);
+        // Reshape the syndrome into 4-bit chunks
+        int[][] syndromeChunks = new int[(syndrome.size() + 3) / 4][4];
+        for (int i = 0; i < syndrome.size(); i++) {
+            syndromeChunks[i / 4][i % 4] = syndrome.get(i);
+        }
+
+        for (int[] syndromeChunk : syndromeChunks) {
+            for (int j = 0; j < syndromeChunks[0].length; j++) {
+                System.out.print(syndromeChunk[j]);
+            }
+            System.out.println();
+        }
+
+        // Syndrome generation matrix
         int[][] transition = {
                 {0, 1, 1, 1, 1, 0, 0, 0},
                 {1, 0, 1, 1, 0, 1, 0, 0},
@@ -135,51 +150,33 @@ public class Hamming {
                 {1, 1, 1, 0, 0, 0, 0, 1}
         };
 
-        List<Integer> result = new ArrayList<>();
-        for (int synd = 0; synd < syndrome.size() / 4; synd++) {
-            // If the syndrome is all zeros, there is no error
-            boolean allZeros = true;
-            for (int i = 0; i < 4; i++) {
-                if (syndrome.get(synd * 4 + i) != 0) {
-                    allZeros = false;
-                    break;
-                }
-            }
-            if (allZeros) {
-                for (int i = 0; i < 8; i++) {
-                    result.add(msgChunks.get(synd).get(i));
-                }
-                continue;
-            }
+        int change;
 
-            // Find the column corresponding to the error in the transition matrix
-            for (int col = 0; col < transition[0].length; col++) {
-                boolean isEqual = true;
-                for (int row = 0; row < transition.length; row++) {
-                    if (transition[row][col] != syndrome.get(synd * 4 + row)) {
-                        isEqual = false;
-                        break;
+        for(int x = 0; x < transition.length; x++) {
+            for(int y = 0; y < transition.length; y++) {
+                change = 0;
+                for(int z = 0; z < syndromeChunks[0].length; z++) {
+                    if(transition[z][y] == syndromeChunks[x][z]) {
+                        change++;
                     }
                 }
-                if (isEqual) {
-                    // Correct the error - tutaj trzeba dopisac kod ktory bedzie poprawnie zmienial bity na wlasciwe w razie bledow przy transmisji
-                    for (int i = 0; i < 8; i++) {
-//                        int currentVal = msgChunks.get(synd).get(col * 8 + i);
-//                        int newVal = (currentVal + 1) % 2;
-//                        result.add(newVal);
-
-                    }
+                if  (change == transition.length) {
+                    int currentVal = msgChunks[x][y];
+                    int newVal = (currentVal + 1) % 2;
+                    msgChunks[x][y] = newVal;
                 }
             }
         }
-        return result;
+
+        // Convert corrected message chunks back to a list
+        List<Integer> correctedMsg = new ArrayList<>();
+        for (int[] msgChunk : msgChunks) {
+            for (int i : msgChunk) {
+                correctedMsg.add(i);
+            }
+        }
+        return correctedMsg;
     }
-
-
-
-
-
-
 
 
 
@@ -205,17 +202,14 @@ public class Hamming {
             int[][] resArray = matrixMultiplication(r, transpose(chunk));
 
             // Convert the result back to a list of integers
-            for (int i = 0; i < resArray.length; i++) {
-                for (int j = 0; j < resArray[i].length; j++) {
-                    result.add(resArray[i][j]);
+            for (int[] ints : resArray) {
+                for (int anInt : ints) {
+                    result.add(anInt);
                 }
             }
         }
 
-        // Remove any trailing zeros
-        while (!result.isEmpty() && result.get(result.size() - 1) == 0) {
-            result.remove(result.size() - 1);
-        }
+
 
         return result;
     }
@@ -249,7 +243,7 @@ public class Hamming {
         return result;
     }
 
-    public static List<Integer> transmit(List<Integer> encodedMsg, BSC bsc) {
+    public static List<Integer> transmitBsc(List<Integer> encodedMsg, BSC bsc) {
         // Konwertuj listę na tablicę intów
         int[][] encodedArray = new int[1][encodedMsg.size()];
         for (int i = 0; i < encodedMsg.size(); i++) {
@@ -268,11 +262,27 @@ public class Hamming {
         return transmittedList;
     }
 
+    public static List<Integer> transmitGe(List<Integer> encodedMsg, GilbertElliot ge) {
+        // Konwertuj listę na tablicę intów
+        int[][] encodedArray = new int[1][encodedMsg.size()];
+        for (int i = 0; i < encodedMsg.size(); i++) {
+            encodedArray[0][i] = encodedMsg.get(i);
+        }
 
+        // Przekaż zakodowaną wiadomość do kanału BSC
+        int[][] transmittedArray = ge.transmit(encodedArray);
 
+        // Konwertuj z powrotem na listę
+        List<Integer> transmittedList = new ArrayList<>();
+        for (int bit : transmittedArray[0]) {
+            transmittedList.add(bit);
+        }
+
+        return transmittedList;
+    }
 
     public static void main(String[] args) {
-        String message = "this is a message we plan to hide";
+        String message = "this is important information that should be kept secret";
         System.out.println("Original Message - string:");
         System.out.println(message);
         System.out.println();
@@ -289,17 +299,26 @@ public class Hamming {
         System.out.println();
 
 
-//        // Inicjalizacja parametrów kanału BSC
-//        double pOfError = 0.1;
-//        double pOfBurst = 0.2;
-//        double pOfCyclic = 0.1;
-//        BSC bsc = new BSC(pOfError, pOfBurst, pOfCyclic, new NumberGeneratorImpl());
-//        // Symulacja transmisji przez kanał BSC
-//        List<Integer> transmittedMsg = transmit(encodedMsg, bsc);
+        // Inicjalizacja parametrów kanału
+        double pOfError = 0.01;
+        double pOfBurst = 0.01;
+        double pOfCyclic = 0.0;
 
-        // Simulate transmission by introducing noise
-        List<Integer> transmittedMsg = new ArrayList<>(encodedMsg); // Copy encoded message
-        transmittedMsg.set(2, 0); // Introduce noise (this simulates transmission)
+        String channel = "null";
+        List<Integer> transmittedMsg = switch (channel) {
+            case "BSC" -> {
+                // Symulacja transmisji przez kanał BSC
+                BSC bsc = new BSC(pOfError, pOfBurst, pOfCyclic, new NumberGeneratorImpl());
+                yield transmitBsc(encodedMsg, bsc);
+            }
+            case "GE" -> {
+                // Symulacja transmisji przez kanał Gilberta-Elliota
+                GilbertElliot ge = new GilbertElliot(pOfError, pOfBurst, pOfCyclic, new NumberGeneratorImpl());
+                yield transmitGe(encodedMsg, ge);
+            }
+            case "null" -> encodedMsg;
+            default -> null;
+        };
 
         System.out.println("Transmitted message:");
         System.out.println(transmittedMsg);
@@ -310,13 +329,13 @@ public class Hamming {
         System.out.println();
 
         // Calculate error syndrome
-        List<Integer> syndrome = syndrome(transmittedMsg.subList(0, encodedMsg.size() / 2));
+        List<Integer> syndrome = syndrome(transmittedMsg.subList(0, transmittedMsg.size() / 2));
         System.out.println("Error Syndrome:");
         System.out.println(syndrome);
         System.out.println();
 
         // Correct the error
-        List<Integer> correctedMessage = correct(encodedMsg, syndrome);
+        List<Integer> correctedMessage = correct(syndrome, transmittedMsg);
 
         // Print the corrected message
         System.out.println("Corrected message:");
@@ -324,7 +343,7 @@ public class Hamming {
         System.out.println();
 
         // Decode the corrected message
-        List<Integer> decodedMessage = decode(transmittedMsg);
+        List<Integer> decodedMessage = decode(correctedMessage);
 
         // Print the decoded message
         System.out.println("Decoded message:");
