@@ -1,7 +1,7 @@
 package pl.pwr.ite.niduc.service.impl.channels;
 
 import pl.pwr.ite.niduc.service.NumberGenerator;
-import pl.pwr.ite.niduc.service.impl.generator.NumberGeneratorImpl;
+import pl.pwr.ite.niduc.service.impl.NumberGeneratorImpl;
 
 // Deklaracja klasy BSC
 public class BSC {
