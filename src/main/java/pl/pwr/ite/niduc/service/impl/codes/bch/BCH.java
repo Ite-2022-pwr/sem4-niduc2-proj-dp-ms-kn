@@ -117,7 +117,7 @@ public class BCH {
 
     public static void main(String[] args) {
         GF257.init();
-        int s = 5; //stopien kodowania - liczba bitow redundandnych
+        int s = 5; //stopien kodowania - liczba bitów redundandnych
         NumberGeneratorImpl rnd = new NumberGeneratorImpl();
         double pOfError = 0.1;
         double pOfBurst = 0.2;

@@ -6,7 +6,7 @@ public class GF257 {
     public static int[][] adds;
     public static int[][] subtracts;
     public static int[][] mults;
-    public static int[] inverse;
+    public static int[] inversed;
     public static boolean[][] addsDone;
     public static boolean[][] subtractsDone;
     public static boolean[][] multsDone;
@@ -21,10 +21,10 @@ public class GF257 {
         addsDone = new boolean[max][max];
         multsDone = new boolean[max][max];
         subtractsDone = new boolean[max][max];
-        inverse = new int[max];
+        inversed = new int[max];
         inverseDone = new boolean[max];
         for(int i = 0; i < adds.length; i++) {
-            inverse[i] = 0;
+            inversed[i] = 0;
             inverseDone[i] = false;
             for(int j = 0; j < adds[0].length; j++) {
                 adds[i][j] = 0; //add(i,j);
@@ -107,13 +107,13 @@ public class GF257 {
                 if(ga.mult(i).val == 1) {
                     inverseDone[a] = true;
                     inverseDone[i] = true;
-                    inverse[a] = i;
-                    inverse[i] = a;
+                    inversed[a] = i;
+                    inversed[i] = a;
                     break;
                 }
             }
         }
-        return new GF257(inverse[a]);
+        return new GF257(inversed[a]);
     }
 
     public static String getBinaryString(int c) {
