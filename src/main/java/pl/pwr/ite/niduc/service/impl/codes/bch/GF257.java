@@ -1,6 +1,6 @@
 package pl.pwr.ite.niduc.service.impl.codes.bch;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 
 public class GF257 {
     public static int[][] adds;
@@ -98,9 +98,9 @@ public class GF257 {
     }
 
     public GF257 getInverse() {
-        return inverse(val);
+        return inverseValue(val);
     }
-    public static GF257 inverse(int a) {
+    public static GF257 inverseValue(int a) {
         if(!inverseDone[a]) {
             GF257 ga = new GF257(a);
             for(char i = 0; i <= (1<<8); i++) {
@@ -125,11 +125,11 @@ public class GF257 {
         return "0b" + s;
     }
 
-    public static HashSet<Integer> findGenerators() {
-        HashSet<Integer> gs = new HashSet<Integer>();
+    public static ArrayList<Integer> findGenerators() {
+        ArrayList<Integer> gs = new ArrayList<>();
         for(int j = 1; j < 257; j++) {
             GF257 gz = new GF257(j);
-            HashSet<Integer> hs = new HashSet<Integer>();
+            ArrayList<Integer> hs = new ArrayList<>();
             hs.add(gz.val);
             for(int i = 2; i < 257; i++) {
                 gz = gz.mult(j);
