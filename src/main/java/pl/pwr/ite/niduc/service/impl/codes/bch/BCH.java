@@ -154,7 +154,8 @@ public class BCH {
         }
 
         //wysylamy przez kanał
-        int[][] transmittedMsg = GilbertElliot.gilbert(encodedArray,pOfError, pOfBurst, pOfCyclic, new NumberGeneratorImpl());
+        GilbertElliot gilbert = new GilbertElliot(pOfError, pOfBurst, pOfCyclic, new NumberGeneratorImpl());
+        int[][] transmittedMsg = gilbert.transmit(encodedArray);
 
         //wypisujemy po transmisji
         System.out.println("Wiadomość po transmisji: ");
