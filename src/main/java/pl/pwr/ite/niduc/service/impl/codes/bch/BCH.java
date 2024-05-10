@@ -71,6 +71,12 @@ public class BCH {
             if(cnt >= k) break;
         }
 
+        System.out.println("Wiadomość zakodowana po naprawie błędów: ");
+        for (int element : c) {
+            System.out.print(element + " ");
+        }
+        System.out.println();
+
         m = gaussianElimination(A,c,k);
 
         return m;
