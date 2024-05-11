@@ -42,7 +42,7 @@ public class SimulationBitRepetition {
         // Powtórzenie symulacji
         for (int i = 0; i < numSimulations; i++) {
             // Symulacja
-            List<Integer> results = simulate(message, repetitonFactor, channel, ber, pOfErrorWhenGood, pOfGoodToBad, pOfErrorWhenBad, pOfBadToGood);
+            List<Double> results = simulate(message, repetitonFactor, channel, ber, pOfErrorWhenGood, pOfGoodToBad, pOfErrorWhenBad, pOfBadToGood);
 
             // Aktualizacja sum
             totalBitsAfterTransmission += results.get(0);
@@ -62,15 +62,15 @@ public class SimulationBitRepetition {
         double avgPercentCharsError = totalPercentCharsError / numSimulations;
 
         // Wyświetlenie średnich
-        System.out.println("Average Swapped bits after Transmission: " + avgBitsAfterTransmission);
-        System.out.println("Average Swapped bits after Correction: " + avgBitsAfterCorrection);
-        System.out.println("Average Swapped chars after Correction: " + avgMessageAfterCorrection);
-        System.out.printf("Average Percent bits correction: %.2f%%\n", avgPercentBitsCorrection);
-        System.out.printf("Average Percent bits error: %.2f%%\n", avgPercentBitsError);
-        System.out.printf("Average Percent chars error: %.2f%%\n", avgPercentCharsError);
+        System.out.printf("Average Swapped bits after Transmission: %.4g\n", avgBitsAfterTransmission);
+        System.out.printf("Average Swapped bits after Correction: %.4g\n", avgBitsAfterCorrection);
+        System.out.printf("Average Swapped chars after Correction: %.4g\n", avgMessageAfterCorrection);
+        System.out.printf("Average Percent bits correction: %.4g%%\n", avgPercentBitsCorrection);
+        System.out.printf("Average Percent bits error: %.4g%%\n", avgPercentBitsError);
+        System.out.printf("Average Percent chars error: %.4g%%\n", avgPercentCharsError);
     }
 
-    public static List<Integer> simulate(String originalMsgString, int repetitonFactor, String channel, double ber, double pOfErrorWhenGood, double pOfGoodToBad, double pOfErrorWhenBad, double pOfBadToGood) {
+    public static List<Double> simulate(String originalMsgString, int repetitonFactor, String channel, double ber, double pOfErrorWhenGood, double pOfGoodToBad, double pOfErrorWhenBad, double pOfBadToGood) {
         // Zapisanie wiadomości do przesłania w bitach
         List<Integer> originalMsgBin = BitRepetition.strToBin(originalMsgString);
 
@@ -106,7 +106,7 @@ public class SimulationBitRepetition {
     }
 
 
-    public static List<Integer> analyzeResults(String originalMessage, List<Integer> binMessage, List<Integer> encodedMsgBin, List<Integer> transmittedMsgBin,
+    public static List<Double> analyzeResults(String originalMessage, List<Integer> binMessage, List<Integer> encodedMsgBin, List<Integer> transmittedMsgBin,
                                                List<Integer> decodedMsgBin, String decodedMsgString) {
         // Analiza bitów po transmisji
         int bitsAfterTransmission = countDifferentBits(encodedMsgBin, transmittedMsgBin);
@@ -127,13 +127,13 @@ public class SimulationBitRepetition {
         double percentCharsError = ((double) messageAfterCorrection) / originalMessage.length() * 100;
 
         // Zwrócenie wyników analizy
-        List<Integer> results = new ArrayList<>();
-        results.add(bitsAfterTransmission);
-        results.add(bitsAfterCorrection);
-        results.add(messageAfterCorrection);
-        results.add((int) percentBitsCorrection);
-        results.add((int) percentBitsError);
-        results.add((int) percentCharsError);
+        List<Double> results = new ArrayList<>();
+        results.add((double) bitsAfterTransmission);
+        results.add((double) bitsAfterCorrection);
+        results.add((double) messageAfterCorrection);
+        results.add(percentBitsCorrection);
+        results.add(percentBitsError);
+        results.add(percentCharsError);
         return results;
     }
 

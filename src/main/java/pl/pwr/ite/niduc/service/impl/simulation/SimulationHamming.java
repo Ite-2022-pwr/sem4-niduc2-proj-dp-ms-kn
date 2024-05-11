@@ -40,7 +40,7 @@ public class SimulationHamming {
         // Powtórzenie symulacji
         for (int i = 0; i < numSimulations; i++) {
             // Symulacja
-            List<Integer> results = simulate(message, channel, ber, pOfErrorWhenGood, pOfGoodToBad, pOfErrorWhenBad, pOfBadToGood);
+            List<Double> results = simulate(message, channel, ber, pOfErrorWhenGood, pOfGoodToBad, pOfErrorWhenBad, pOfBadToGood);
 
             // Aktualizacja sum
             totalBitsAfterTransmission += results.get(0);
@@ -63,18 +63,19 @@ public class SimulationHamming {
         double avgPercentBitsError = totalPercentBitsError / numSimulations;
         double avgPercentCharsError = totalPercentCharsError / numSimulations;
 
-        // Wyświetlenie średnich
-        System.out.println("Average Swapped bits after Transmission: " + avgBitsAfterTransmission);
-        System.out.println("Average Swapped bits after Correction: " + avgBitsAfterCorrection);
-        System.out.println("Average Swapped chars after Transmission: " + avgMessageAfterTransmission);
-        System.out.println("Average Swapped chars after Correction: " + avgMessageAfterCorrection);
-        System.out.printf("Average Percent bits correction: %.2f%%\n", avgPercentBitsCorrection);
-        System.out.printf("Average Percent chars correction: %.2f%%\n", avgPercentCharsCorrection);
-        System.out.printf("Average Percent bits error: %.2f%%\n", avgPercentBitsError);
-        System.out.printf("Average Percent chars error: %.2f%%\n", avgPercentCharsError);
+
+        // Wyświetlenie średnich z zaokrągleniem do 4 miejsc po przecinku i usuwaniem nieznaczących zer
+        System.out.printf("Average Swapped bits after Transmission: %.4g\n", avgBitsAfterTransmission);
+        System.out.printf("Average Swapped bits after Correction: %.4g\n", avgBitsAfterCorrection);
+        System.out.printf("Average Swapped chars after Transmission: %.4g\n", avgMessageAfterTransmission);
+        System.out.printf("Average Swapped chars after Correction: %.4g\n", avgMessageAfterCorrection);
+        System.out.printf("Average Percent bits correction: %.4g%%\n", avgPercentBitsCorrection);
+        System.out.printf("Average Percent chars correction: %.4g%%\n", avgPercentCharsCorrection);
+        System.out.printf("Average Percent bits error: %.4g%%\n", avgPercentBitsError);
+        System.out.printf("Average Percent chars error: %.4g%%\n", avgPercentCharsError);
     }
 
-    public static List<Integer> simulate(String originalMsgString, String channel, double ber, double pOfErrorWhenGood, double pOfGoodToBad, double pOfErrorWhenBad, double pOfBadToGood) {
+    public static List<Double> simulate(String originalMsgString, String channel, double ber, double pOfErrorWhenGood, double pOfGoodToBad, double pOfErrorWhenBad, double pOfBadToGood) {
         // Zapisanie wiadomości do przesłania w bitach
         List<Integer> originalMsgBin = Hamming.strToBin(originalMsgString);
 
@@ -119,7 +120,7 @@ public class SimulationHamming {
     }
 
 
-    public static List<Integer> analyzeResults(String originalMessage, List<Integer> binMessage, List<Integer> encodedMsgBin, List<Integer> transmittedMsgBin,
+    public static List<Double> analyzeResults(String originalMessage, List<Integer> binMessage, List<Integer> encodedMsgBin, List<Integer> transmittedMsgBin,
                                                String transmittedMsgString, List<Integer> decodedMsgBin, String decodedMsgString) {
         // Analiza bitów po transmisji
         int bitsAfterTransmission = countDifferentBits(encodedMsgBin, transmittedMsgBin);
@@ -146,15 +147,15 @@ public class SimulationHamming {
         double percentCharsError = ((double) messageAfterCorrection) / originalMessage.length() * 100;
 
         // Zwrócenie wyników analizy
-        List<Integer> results = new ArrayList<>();
-        results.add(bitsAfterTransmission);
-        results.add(bitsAfterCorrection);
-        results.add(messageAfterTransmission);
-        results.add(messageAfterCorrection);
-        results.add((int) percentBitsCorrection);
-        results.add((int) percentCharsCorrection);
-        results.add((int) percentBitsError);
-        results.add((int) percentCharsError);
+        List<Double> results = new ArrayList<>();
+        results.add((double) bitsAfterTransmission);
+        results.add((double) bitsAfterCorrection);
+        results.add((double) messageAfterTransmission);
+        results.add((double) messageAfterCorrection);
+        results.add(percentBitsCorrection);
+        results.add(percentCharsCorrection);
+        results.add(percentBitsError);
+        results.add(percentCharsError);
         return results;
     }
 
