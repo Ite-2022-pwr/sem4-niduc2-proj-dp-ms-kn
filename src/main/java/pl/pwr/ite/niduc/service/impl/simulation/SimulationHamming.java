@@ -22,10 +22,10 @@ public class SimulationHamming {
 
         // Błędy
         double ber = 0.2;
-        double pOfErrorWhenGood = 0.1;
-        double pOfGoodToBad = 0.2;
-        double pOfErrorWhenBad = 0.3;
-        double pOfBadToGood = 0.4;
+        double pOfErrorWhenGood = 0.01;
+        double pOfGoodToBad = 0.1;
+        double pOfErrorWhenBad = 0.1;
+        double pOfBadToGood = 0.8;
 
         // Inicjalizacja sum dla obliczenia średnich
         int totalBitsAfterTransmission = 0;
@@ -34,6 +34,8 @@ public class SimulationHamming {
         int totalMessageAfterCorrection = 0;
         double totalPercentBitsCorrection = 0;
         double totalPercentCharsCorrection = 0;
+        double totalPercentBitsError = 0;
+        double totalPercentCharsError = 0;
 
         // Powtórzenie symulacji
         for (int i = 0; i < numSimulations; i++) {
@@ -47,6 +49,8 @@ public class SimulationHamming {
             totalMessageAfterCorrection += results.get(3);
             totalPercentBitsCorrection += results.get(4);
             totalPercentCharsCorrection += results.get(5);
+            totalPercentBitsError += results.get(6);
+            totalPercentCharsError += results.get(7);
         }
 
         // Obliczenie średnich
@@ -56,6 +60,8 @@ public class SimulationHamming {
         double avgMessageAfterCorrection = (double) totalMessageAfterCorrection / numSimulations;
         double avgPercentBitsCorrection = totalPercentBitsCorrection / numSimulations;
         double avgPercentCharsCorrection = totalPercentCharsCorrection / numSimulations;
+        double avgPercentBitsError = totalPercentBitsError / numSimulations;
+        double avgPercentCharsError = totalPercentCharsError / numSimulations;
 
         // Wyświetlenie średnich
         System.out.println("Average Swapped bits after Transmission: " + avgBitsAfterTransmission);
@@ -64,6 +70,8 @@ public class SimulationHamming {
         System.out.println("Average Swapped chars after Correction: " + avgMessageAfterCorrection);
         System.out.printf("Average Percent bits correction: %.2f%%\n", avgPercentBitsCorrection);
         System.out.printf("Average Percent chars correction: %.2f%%\n", avgPercentCharsCorrection);
+        System.out.printf("Average Percent bits error: %.2f%%\n", avgPercentBitsError);
+        System.out.printf("Average Percent chars error: %.2f%%\n", avgPercentCharsError);
     }
 
     public static List<Integer> simulate(String originalMsgString, String channel, double ber, double pOfErrorWhenGood, double pOfGoodToBad, double pOfErrorWhenBad, double pOfBadToGood) {
@@ -92,7 +100,7 @@ public class SimulationHamming {
         String decodedMsgString = Hamming.binToStr(decodedMsgBin);
 
         // Analiza wyników
-        return analyzeResults(originalMsgString, originalMsgBin, transmittedMsgBin, transmittedMsgString, correctedMsgBin, decodedMsgBin, decodedMsgString);
+        return analyzeResults(originalMsgString, originalMsgBin, transmittedMsgBin, transmittedMsgString, decodedMsgBin, decodedMsgString);
     }
 
     public static List<Integer> transmit(String channel, List<Integer> encodedMsg, double ber, double pOfErrorWhenGood, double pOfGoodToBad, double pOfErrorWhenBad, double pOfBadToGood) {
@@ -112,7 +120,7 @@ public class SimulationHamming {
 
 
     public static List<Integer> analyzeResults(String originalMessage, List<Integer> binMessage, List<Integer> transmittedMsgBin,
-                                               String transmittedMsgString, List<Integer> correctedMsgBin, List<Integer> decodedMsgBin, String decodedMsgString) {
+                                               String transmittedMsgString, List<Integer> decodedMsgBin, String decodedMsgString) {
         // Analiza bitów po transmisji
         int bitsAfterTransmission = countDifferentBits(binMessage, transmittedMsgBin);
 
@@ -131,6 +139,12 @@ public class SimulationHamming {
         // Obliczenie procentowej poprawy dla znaków
         double percentCharsCorrection = ((double) messageAfterTransmission - messageAfterCorrection) / messageAfterTransmission * 100;
 
+        // Obliczenie ile procent błędu zostało - ostateczny wynik dla bitów
+        double percentBitsError = ((double) bitsAfterCorrection) / binMessage.size() * 100;
+
+        // Obliczenie ile procent błędu zostało - ostateczny wynik dla znaków
+        double percentMessageError = ((double) messageAfterCorrection) / originalMessage.length() * 100;
+
         // Zwrócenie wyników analizy
         List<Integer> results = new ArrayList<>();
         results.add(bitsAfterTransmission);
@@ -139,6 +153,8 @@ public class SimulationHamming {
         results.add(messageAfterCorrection);
         results.add((int) percentBitsCorrection);
         results.add((int) percentCharsCorrection);
+        results.add((int) percentBitsError);
+        results.add((int) percentMessageError);
         return results;
     }
 

@@ -120,10 +120,10 @@ public class BCH {
         int s = 5; //stopien kodowania - liczba bitów redundandnych
         NumberGeneratorImpl rnd = new NumberGeneratorImpl();
         double ber = 0.2;
-        double pOfErrorWhenGood = 0.1;
-        double pOfGoodToBad = 0.2;
-        double pOfErrorWhenBad = 0.3;
-        double pOfBadToGood = 0.4;
+        double pOfErrorWhenGood = 0.01;
+        double pOfGoodToBad = 0.1;
+        double pOfErrorWhenBad = 0.1;
+        double pOfBadToGood = 0.8;
         ArrayList<Integer> originMsg = new ArrayList<>();
 
         //losowy generator
