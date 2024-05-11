@@ -1,104 +1,98 @@
 package pl.pwr.ite.niduc.service.impl.channels;
 
-import pl.pwr.ite.niduc.service.NumberGenerator;
 import pl.pwr.ite.niduc.service.impl.generator.NumberGeneratorImpl;
 
 public class GilbertElliot {
+    // Prawdopodobieństwo błędu, gdy kanał jest w dobrym stanie
+    private double pOfErrorWhenGood;
+    // Prawdopodobieństwo przejścia z dobrego stanu do złego
+    private double pOfGoodToBad;
+    // Prawdopodobieństwo błędu, gdy kanał jest w złym stanie
+    private double pOfErrorWhenBad;
+    // Prawdopodobieństwo przejścia z złego stanu do dobrego
+    private double pOfBadToGood;
+    // Obiekt generatora liczb losowych
+    private NumberGeneratorImpl numberGenerator;
 
-    // Deklaracja zmiennych przechowujących parametry kanału oraz generator liczb losowych
-    private final double ber; // BER
-    private final double independentErrors; // Błąd niezależny
-    private final double groupErrors; // Błąd grupowy
-    private final NumberGenerator numberGenerator; // Generator liczb losowych
-
-
-    // Konstruktor klasy Gilberta-Elliota, inicjalizuje parametry kanału i generatora liczb losowych
-    public GilbertElliot(double ber, double independentErrors, double groupErrors, NumberGenerator numberGenerator) {
-        this.ber = ber;
-        this.independentErrors = independentErrors;
-        this.groupErrors = groupErrors;
-        this.numberGenerator = numberGenerator;
+    // Konstruktor klasy Gilberta-Elliotta
+    public GilbertElliot(double pOfErrorWhenGood, double pOfGoodToBad, double pOfErrorWhenBad, double pOfBadToGood, NumberGeneratorImpl numberGenerator) {
+        // Inicjalizacja parametrów kanału
+        this.pOfErrorWhenGood = pOfErrorWhenGood;
+        this.pOfGoodToBad = pOfGoodToBad;
+        this.pOfErrorWhenBad = pOfErrorWhenBad;
+        this.pOfBadToGood = pOfBadToGood;
+        // Inicjalizacja generatora liczb losowych
+        this.numberGenerator = new NumberGeneratorImpl();
     }
 
-
-    // Metoda symulująca działanie kanału Gilberta-Elliot
+    // Metoda transmitująca dane przez kanał Gilberta-Elliotta
     public int[][] transmit(int[][] inputArray) {
-
-        // Inicjalizacja tablicy wyjściowej o takich samych wymiarach jak tablica wejściowa
+        // Inicjalizacja tablicy wyjściowej, która przechowuje dane wyjściowe po transmisji
         int[][] outputArray = new int[inputArray.length][inputArray[0].length];
-
-        // Inicjalizacja zmiennej określającej stan kanału (dobry lub zły)
+        // Zmienna przechowująca aktualny stan kanału (dobry lub zły)
         boolean goodState = true;
 
-        // Pętla iterująca po wierszach tablicy wejściowej
+        // Iteracja po wierszach tablicy wejściowej
         for (int i = 0; i < inputArray.length; i++) {
-
-            // Pętla iterująca po elementach w danym wierszu tablicy wejściowej
+            // Iteracja po kolumnach tablicy wejściowej
             for (int j = 0; j < inputArray[i].length; j++) {
-
-                // Sprawdzenie aktualnego stanu kanału
+                // Sprawdzenie, czy kanał jest w dobrym stanie
                 if (goodState) {
-                    // Jeśli kanał jest w dobrym stanie, sprawdzane jest, czy ma wystąpić błąd bitu na podstawie zadanego BER
-                    if (numberGenerator.nextInteger(0, 1000) / 1000.0 < ber) {
-                        // Jeśli błąd ma wystąpić, bit jest odwracany (jeśli był 0, to staje się 1, i odwrotnie)
+                    // Losowanie liczby z generatora i porównanie z prawdopodobieństwem błędu w dobrym stanie
+                    if (numberGenerator.nextInteger(0, 1000) < pOfErrorWhenGood * 1000) {
+                        // Jeśli błąd, odwrócenie bitu
                         outputArray[i][j] = flipBit(inputArray[i][j]);
                     } else {
-                        // W przeciwnym razie bit pozostaje niezmieniony
+                        // Bez błędu, przekazanie danych bez zmiany
                         outputArray[i][j] = inputArray[i][j];
                     }
-                    // Zmiana stanu kanału na podstawie prawdopodobieństwa przejścia ze stanu dobrego do złego
-                    goodState = nextState(numberGenerator, independentErrors);
+                    // Losowanie stanu na podstawie prawdopodobieństwa przejścia ze stanu dobrego do złego
+                    goodState = numberGenerator.nextInteger(0, 1000) > pOfGoodToBad * 1000;
                 } else {
-                    // Analogiczne działanie, gdy kanał jest w złym stanie, ale z innym prawdopodobieństwem przejścia
-                    if (numberGenerator.nextInteger(0, 1000) / 1000.0 < ber) {
+                    // Jeśli kanał jest w złym stanie, analogicznie do powyższego
+                    if (numberGenerator.nextInteger(0, 1000) < pOfErrorWhenBad * 1000) {
                         outputArray[i][j] = flipBit(inputArray[i][j]);
                     } else {
                         outputArray[i][j] = inputArray[i][j];
                     }
-                    goodState = nextState(numberGenerator, groupErrors);
+                    goodState = numberGenerator.nextInteger(0, 1000) > (1 - pOfBadToGood) * 1000;
                 }
             }
         }
-        // Zwrócenie tablicy wyjściowej po zakończeniu symulacji
         return outputArray;
     }
 
-    // Metoda odwracająca bit (0 na 1 i odwrotnie)
-    private static int flipBit(int bit) {
+    // Metoda odwracająca bit
+    private int flipBit(int bit) {
         return bit ^ 1;
     }
 
-
-    // Metoda określająca następny stan kanału na podstawie prawdopodobieństwa
-    private static boolean nextState(NumberGenerator numberGenerator, double probability) {
-        // Losowanie liczby i porównanie z prawdopodobieństwem
-        return numberGenerator.nextInteger(0, 1000) / 1000.0 > probability;
-    }
-
-
-    // Metoda główna z przykładem działania
     public static void main(String[] args) {
-        // Inicjalizacja parametrów kanału oraz tablicy wejściowej
-        double ber = 0.1; // Bit Error Rate
-        double independentErrors = 0.2; // Błąd niezależny
-        double groupErrors = 0.1; // Błąd grupowy
-        GilbertElliot ge = new GilbertElliot(ber, independentErrors, groupErrors, new NumberGeneratorImpl()); // Inicjalizacja obiektu klasy BSC
-        int[][] inputArray = {{0, 1, 1, 0, 0, 1}, {1, 0, 1, 0, 0, 1}}; // Tablica wejściowa
+        // Przykładowe dane wejściowe
+        int[][] inputArray = {{0, 1, 1, 0, 0, 1}, {1, 0, 1, 0, 0, 1}};
+        // Inicjalizacja parametrów kanału
+        double pOfErrorWhenGood = 0.1;
+        double pOfGoodToBad = 0.2;
+        double pOfErrorWhenBad = 0.3;
+        double pOfBadToGood = 0.4;
 
-        // Wyświetlenie tablicy wejściowej
-        System.out.println("Input:");
-        printArray(inputArray);
+        // Inicjalizacja obiektu klasy Gilberta-Elliotta
+        GilbertElliot channel = new GilbertElliot(pOfErrorWhenGood, pOfGoodToBad, pOfErrorWhenBad, pOfBadToGood, new NumberGeneratorImpl());
+        // Transmitowanie danych przez kanał
+        int[][] outputArray = channel.transmit(inputArray);
 
-        // Symulacja transmisji przez kanał BSC i wyświetlenie danych wyjściowych
-        int[][] outputArray = ge.transmit(inputArray);
-        System.out.println("\nOutput:");
-        printArray(outputArray);
-    }
+        // Wyświetlenie danych wejściowych
+        System.out.println("Input: ");
+        for (int[] row : inputArray) {
+            for (int value : row) {
+                System.out.print(value + " ");
+            }
+            System.out.println();
+        }
 
-
-    // Metoda wyświetlająca tablicę
-    private static void printArray(int[][] array) {
-        for (int[] row : array) {
+        // Wyświetlenie danych wyjściowych
+        System.out.println("Output: ");
+        for (int[] row : outputArray) {
             for (int value : row) {
                 System.out.print(value + " ");
             }

@@ -1,6 +1,6 @@
 package pl.pwr.ite.niduc.service.impl.codes.bch;
 
-import pl.pwr.ite.niduc.service.impl.NumberGeneratorImpl;
+import pl.pwr.ite.niduc.service.impl.generator.NumberGeneratorImpl;
 import pl.pwr.ite.niduc.service.impl.channels.GilbertElliot;
 import java.util.*;
 
@@ -119,9 +119,11 @@ public class BCH {
         GF257.init();
         int s = 5; //stopien kodowania - liczba bitów redundandnych
         NumberGeneratorImpl rnd = new NumberGeneratorImpl();
-        double pOfError = 0.1;
-        double pOfBurst = 0.2;
-        double pOfCyclic = 0.1;
+        double ber = 0.2;
+        double pOfErrorWhenGood = 0.1;
+        double pOfGoodToBad = 0.2;
+        double pOfErrorWhenBad = 0.3;
+        double pOfBadToGood = 0.4;
         ArrayList<Integer> originMsg = new ArrayList<>();
 
         //losowy generator
@@ -154,7 +156,7 @@ public class BCH {
         }
 
         //wysylamy przez kanał
-        GilbertElliot gilbert = new GilbertElliot(pOfError, pOfBurst, pOfCyclic, new NumberGeneratorImpl());
+        GilbertElliot gilbert = new GilbertElliot(pOfErrorWhenGood, pOfGoodToBad, pOfErrorWhenBad, pOfBadToGood, new NumberGeneratorImpl());
         int[][] transmittedMsg = gilbert.transmit(encodedArray);
 
         //wypisujemy po transmisji

@@ -15,6 +15,7 @@
     </properties>
 
     <dependencies>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -33,6 +34,12 @@
             <version>5.9.2</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.psambit9791</groupId>
+            <artifactId>jdsp</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
     </dependencies>
 
 </project>

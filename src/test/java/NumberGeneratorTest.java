@@ -1,12 +1,9 @@
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import pl.pwr.ite.niduc.service.NumberGenerator;
-import pl.pwr.ite.niduc.service.impl.NumberGeneratorImpl;
+import pl.pwr.ite.niduc.service.impl.generator.NumberGeneratorImpl;
 
-import java.lang.annotation.Repeatable;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -26,12 +23,13 @@ public class NumberGeneratorTest {
         numberGenerator = new NumberGeneratorImpl();
     }
 
-    @RepeatedTest(10)
+    @RepeatedTest(100)
     public void numberGeneratorNormalDistributionTest() {
         int[] numbers = IntStream.generate(numberGenerator::nextInteger).limit(30).sorted().toArray();
        double calculatedSum = 0;
         var n = (int) Math.floor(numbers.length / 2);
         for(int i = 0; i < n; i++) {
+
             var a = numbers[i] - numbers[numbers.length - 1 - i];
             calculatedSum += constants[i] * a;
         }

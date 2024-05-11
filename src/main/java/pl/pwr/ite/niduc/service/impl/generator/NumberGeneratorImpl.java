@@ -1,4 +1,4 @@
-package pl.pwr.ite.niduc.service.impl;
+package pl.pwr.ite.niduc.service.impl.generator;
 
 import pl.pwr.ite.niduc.service.NumberGenerator;
 
@@ -19,7 +19,7 @@ public class NumberGeneratorImpl implements NumberGenerator {
     private long seed;
 
     public NumberGeneratorImpl() {
-        this.seed = generateSeed("C:\\Users\\Dell\\Pictures\\info.jpg");
+        this.seed = generateSeed("C:\\Users\\Gosia\\Documents\\photos\\flowers.JPG");
     }
 
     @Override

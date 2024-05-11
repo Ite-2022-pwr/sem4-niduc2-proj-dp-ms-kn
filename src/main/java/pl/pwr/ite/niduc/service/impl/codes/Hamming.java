@@ -21,7 +21,7 @@ public class Hamming {
         List<Integer> ret = new ArrayList<>();
         for (char c : string.toCharArray()) {
             String binary = Integer.toBinaryString(c);
-            while (binary.length() < CODE_BITS) {
+            while (binary.length() < 7) {
                 binary = "0" + binary; // Uzupełnienie zerami, aby uzyskać stałą długość bloku kodowego
             }
             for (char bit : binary.toCharArray()) {
@@ -35,9 +35,9 @@ public class Hamming {
     // Metoda zamieniająca binarną listę na ciąg znaków
     public static String binToStr(List<Integer> binary) {
         StringBuilder output = new StringBuilder();
-        for (int i = 0; i < binary.size(); i += CODE_BITS) {
+        for (int i = 0; i < binary.size(); i += 7) {
             StringBuilder binaryChar = new StringBuilder();
-            for (int j = i; j < i + CODE_BITS; j++) {
+            for (int j = i; j < i + 7; j++) {
                 if (j < binary.size()) {
                     binaryChar.append(binary.get(j));
                 }
@@ -64,7 +64,7 @@ public class Hamming {
         }
 
         // Macierz przejścia dla generowania bitów parzystości dla Hamminga(7,4)
-        int[][] transition = new int[][]{
+        int[][] transition = new int[][] {
                 {1, 0, 0, 0, 0, 1, 1, 1},
                 {0, 1, 0, 0, 1, 0, 1, 1},
                 {0, 0, 1, 0, 1, 1, 0, 1},
@@ -131,7 +131,7 @@ public class Hamming {
     }
 
     // Metoda poprawiająca błędy w wiadomości
-    private static List<Integer> correct(List<Integer> syndrome, List<Integer> msg) {
+    public static List<Integer> correct(List<Integer> syndrome, List<Integer> msg) {
         // Podział wiadomości na bloki danych
         int[][] msgChunks = new int[(msg.size() + CODE_BITS) / MESSAGE_BITS][MESSAGE_BITS];
         for (int i = 0; i < msg.size(); i++) {
@@ -305,21 +305,23 @@ public class Hamming {
         System.out.println();
 
         // Inicjalizacja parametrów kanału
-        double pOfError = 0.02;
-        double pOfBurst = 0.02;
-        double pOfCyclic = 0.02;
+        double ber = 0.02;
+        double pOfErrorWhenGood = 0.01;
+        double pOfGoodToBad = 0.1;
+        double pOfErrorWhenBad = 0.1;
+        double pOfBadToGood = 0.8;
 
         // Symulacja transmisji przez wybrany kanał
         String channel = "GE";
         List<Integer> transmittedMsg = switch (channel) {
             case "BSC" -> {
                 // Symulacja transmisji przez kanał BSC
-                BSC bsc = new BSC(pOfError, pOfBurst, pOfCyclic, new NumberGeneratorImpl());
+                BSC bsc = new BSC(ber, new NumberGeneratorImpl());
                 yield transmitBsc(encodedMsg, bsc);
             }
             case "GE" -> {
                 // Symulacja transmisji przez kanał Gilberta-Elliota
-                GilbertElliot ge = new GilbertElliot(pOfError, pOfBurst, pOfCyclic, new NumberGeneratorImpl());
+                GilbertElliot ge = new GilbertElliot(pOfErrorWhenGood, pOfGoodToBad, pOfErrorWhenBad, pOfBadToGood, new NumberGeneratorImpl());
                 yield transmitGe(encodedMsg, ge);
             }
             case "null" -> encodedMsg;
@@ -332,7 +334,7 @@ public class Hamming {
         System.out.println();
 
         // Dekodowanie zakodowanej wiadomości po transmisji
-        System.out.println("Decoded message:");
+        System.out.println("Transmitted message:");
         System.out.println(binToStr(decode(transmittedMsg)));
         System.out.println();
 
