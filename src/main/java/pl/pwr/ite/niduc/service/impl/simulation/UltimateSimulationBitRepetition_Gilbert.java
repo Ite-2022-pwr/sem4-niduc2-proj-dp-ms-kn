@@ -11,8 +11,11 @@ import org.knowm.xchart.XYChart;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChartBuilder;
 
+import static pl.pwr.ite.niduc.service.impl.codes.BitRepetition.encode;
+
 public class UltimateSimulationBitRepetition_Gilbert {
 
+    static int repetitionFactor2 = 10;
     public static void main(String[] args) {
         String message = "this is important information that should be kept secret";
         int numSimulations = 1;
@@ -20,16 +23,16 @@ public class UltimateSimulationBitRepetition_Gilbert {
         List<List<Double>> avgPercentBitsAfterTransmissionValuesList = new ArrayList<>();
         List<List<Double>> avgPercentBitsCorrectionValuesList = new ArrayList<>();
 
-        for (int repetitionFactor = 10; repetitionFactor >= 1; repetitionFactor--) {
+        for (int repetitionFactor = repetitionFactor2; repetitionFactor >= 1; repetitionFactor--) {
             List<Double> avgPercentBitsAfterTransmissionValues = new ArrayList<>();
             List<Double> avgPercentBitsCorrectionValues = new ArrayList<>();
 
-            double pGoodToBad = 0.05;
-            double pBadToGood = 1.0;
-            double pErrorWhenGood = 0.05;
-            double pErrorWhenBad = 0.05;
+            double pGoodToBad = 0.005;
+            double pBadToGood = 0.1;
+            double pErrorWhenGood = 0.005;
+            double pErrorWhenBad = 0.005;
 
-            while(pGoodToBad <= 1.0 && pBadToGood >= 0.05 && pErrorWhenGood <= 1.0 && pErrorWhenBad <= 1.0) {
+            while(pGoodToBad <= 0.1 && pBadToGood >= 0.005 && pErrorWhenGood <= 0.1 && pErrorWhenBad <= 0.1) {
 
                 // Inicjalizacja sum dla obliczenia średnich
                 double totalPercentBitsAfterTransmission = 0;
@@ -53,10 +56,10 @@ public class UltimateSimulationBitRepetition_Gilbert {
                 System.out.println("Procent zdolnosci naprawiania bledow: " + avgPercentBitsCorrection + "%");
                 System.out.println();
 
-                pGoodToBad += 0.05;
-                pBadToGood -= 0.05;
-                pErrorWhenGood += 0.05;
-                pErrorWhenBad += 0.05;
+                pGoodToBad += 0.005;
+                pBadToGood -= 0.005;
+                pErrorWhenGood += 0.005;
+                pErrorWhenBad += 0.005;
             }
 
             avgPercentBitsAfterTransmissionValuesList.add(avgPercentBitsAfterTransmissionValues);
@@ -67,11 +70,11 @@ public class UltimateSimulationBitRepetition_Gilbert {
         XYChart chart = new XYChartBuilder().width(800).height(600).title("Wykresy dla kodu powielania bitow i kanalu Gilberta-Elliota")
                 .xAxisTitle("Zawartosc bledu [%]").yAxisTitle("Zdolnosc korekcyjna [%]").build();
 
-        for (int i = 0; i < avgPercentBitsAfterTransmissionValuesList.size(); i++) {
+        for (int i = 0; i < repetitionFactor2; i++) {
             List<Double> avgPercentBitsAfterTransmissionValues = avgPercentBitsAfterTransmissionValuesList.get(i);
             List<Double> avgPercentBitsCorrectionValues = avgPercentBitsCorrectionValuesList.get(i);
 
-            String seriesName = "Repetition Factor " + (i + 1);
+            String seriesName = "Repetition Factor " + (repetitionFactor2 - i);
             chart.addSeries(seriesName, avgPercentBitsAfterTransmissionValues, avgPercentBitsCorrectionValues);
         }
 
@@ -84,7 +87,7 @@ public class UltimateSimulationBitRepetition_Gilbert {
         List<Integer> transmittedMsgBin = transmit(encodedMsgBin, pGoodToBad, pBadToGood, pErrorWhenGood, pErrorWhenBad);
         List<Integer> decodedMsgBin = BitRepetition.decode(transmittedMsgBin, repetitionFactor);
 
-        return analyzeResults(originalMsgBin, encodedMsgBin, transmittedMsgBin, decodedMsgBin);
+        return analyzeResults(originalMsgBin, encodedMsgBin, transmittedMsgBin, decodedMsgBin, repetitionFactor);
     }
 
     public static List<Integer> transmit(List<Integer> encodedMsg, double pOfGoodToBad, double pOfBadToGood, double pOfErrorWhenGood, double pOfErrorWhenBad) {
@@ -94,11 +97,13 @@ public class UltimateSimulationBitRepetition_Gilbert {
     }
 
     public static List<Double> analyzeResults(List<Integer> binMessage, List<Integer> encodedMsgBin,
-                                              List<Integer> transmittedMsgBin, List<Integer> decodedMsgBin) {
+                                              List<Integer> transmittedMsgBin, List<Integer> decodedMsgBin, int repetitionFactor) {
         int bitsAfterTransmission = countDifferentBits(encodedMsgBin, transmittedMsgBin);
         double percentBitsAfterTransmission = (double) bitsAfterTransmission / encodedMsgBin.size() * 100;
-        int bitsAfterCorrection = countDifferentBits(binMessage, decodedMsgBin);
-        double percentBitsCorrection = ((double) bitsAfterTransmission - bitsAfterCorrection) / bitsAfterTransmission * 100;
+
+        List<Integer> encodedDecoded = encode(decodedMsgBin, repetitionFactor);
+        int bitsAfterCorrection = countDifferentBits(encodedDecoded, encodedMsgBin);
+        double percentBitsCorrection = ((double) bitsAfterTransmission - (double) bitsAfterCorrection) / (double) bitsAfterTransmission * 100;
 
         List<Double> results = new ArrayList<>();
         results.add(percentBitsAfterTransmission);

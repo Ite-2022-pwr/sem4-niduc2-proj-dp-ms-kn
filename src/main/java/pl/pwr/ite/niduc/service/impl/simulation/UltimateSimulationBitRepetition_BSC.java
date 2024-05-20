@@ -11,8 +11,11 @@ import org.knowm.xchart.XYChart;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChartBuilder;
 
+import static pl.pwr.ite.niduc.service.impl.codes.BitRepetition.encode;
+
 public class UltimateSimulationBitRepetition_BSC {
 
+    static int repetitionFactor2 = 10;
     public static void main(String[] args) {
         String message = "this is important information that should be kept secret";
         int numSimulations = 1;
@@ -20,11 +23,11 @@ public class UltimateSimulationBitRepetition_BSC {
         List<List<Double>> avgPercentBitsAfterTransmissionValuesList = new ArrayList<>();
         List<List<Double>> avgPercentBitsCorrectionValuesList = new ArrayList<>();
 
-        for (int repetitionFactor = 10; repetitionFactor >= 1; repetitionFactor--) {
+        for (int repetitionFactor = repetitionFactor2; repetitionFactor >= 1; repetitionFactor--) {
             List<Double> avgPercentBitsAfterTransmissionValues = new ArrayList<>();
             List<Double> avgPercentBitsCorrectionValues = new ArrayList<>();
 
-            for (double ber = 0.05; ber <= 1.0; ber += 0.05) {
+            for (double ber = 0.005; ber <= 0.1; ber += 0.005) {
 
                 // Inicjalizacja sum dla obliczenia średnich
                 double totalPercentBitsAfterTransmission = 0;
@@ -58,11 +61,11 @@ public class UltimateSimulationBitRepetition_BSC {
         XYChart chart = new XYChartBuilder().width(800).height(600).title("Wykresy dla kodu powielania bitow i kanalu BSC")
                 .xAxisTitle("Zawartosc bledu [%]").yAxisTitle("Zdolnosc korekcyjna [%]").build();
 
-        for (int i = 0; i < avgPercentBitsAfterTransmissionValuesList.size(); i++) {
+        for (int i = 0; i < repetitionFactor2; i++) {
             List<Double> avgPercentBitsAfterTransmissionValues = avgPercentBitsAfterTransmissionValuesList.get(i);
             List<Double> avgPercentBitsCorrectionValues = avgPercentBitsCorrectionValuesList.get(i);
 
-            String seriesName = "Repetition Factor " + (i + 1);
+            String seriesName = "Repetition Factor " + (repetitionFactor2 - i);
             chart.addSeries(seriesName, avgPercentBitsAfterTransmissionValues, avgPercentBitsCorrectionValues);
         }
 
@@ -71,11 +74,11 @@ public class UltimateSimulationBitRepetition_BSC {
 
     public static List<Double> simulate(String originalMsgString, int repetitionFactor, double ber) {
         List<Integer> originalMsgBin = BitRepetition.strToBin(originalMsgString);
-        List<Integer> encodedMsgBin = BitRepetition.encode(originalMsgBin, repetitionFactor);
+        List<Integer> encodedMsgBin = encode(originalMsgBin, repetitionFactor);
         List<Integer> transmittedMsgBin = transmit(encodedMsgBin, ber);
         List<Integer> decodedMsgBin = BitRepetition.decode(transmittedMsgBin, repetitionFactor);
 
-        return analyzeResults(originalMsgBin, encodedMsgBin, transmittedMsgBin, decodedMsgBin);
+        return analyzeResults(encodedMsgBin, transmittedMsgBin, decodedMsgBin, repetitionFactor);
     }
 
     public static List<Integer> transmit(List<Integer> encodedMsg, double ber) {
@@ -84,12 +87,14 @@ public class UltimateSimulationBitRepetition_BSC {
 
     }
 
-    public static List<Double> analyzeResults(List<Integer> binMessage, List<Integer> encodedMsgBin,
-                                              List<Integer> transmittedMsgBin, List<Integer> decodedMsgBin) {
+    public static List<Double> analyzeResults(List<Integer> encodedMsgBin,
+                                              List<Integer> transmittedMsgBin, List<Integer> decodedMsgBin, int repetitionFactor) {
         int bitsAfterTransmission = countDifferentBits(encodedMsgBin, transmittedMsgBin);
         double percentBitsAfterTransmission = (double) bitsAfterTransmission / encodedMsgBin.size() * 100;
-        int bitsAfterCorrection = countDifferentBits(binMessage, decodedMsgBin);
-        double percentBitsCorrection = ((double) bitsAfterTransmission - bitsAfterCorrection) / bitsAfterTransmission * 100;
+
+        List<Integer> encodedDecoded = encode(decodedMsgBin, repetitionFactor);
+        int bitsAfterCorrection = countDifferentBits(encodedDecoded, encodedMsgBin);
+        double percentBitsCorrection = ((double) bitsAfterTransmission - (double) bitsAfterCorrection) / (double) bitsAfterTransmission * 100;
 
         List<Double> results = new ArrayList<>();
         results.add(percentBitsAfterTransmission);

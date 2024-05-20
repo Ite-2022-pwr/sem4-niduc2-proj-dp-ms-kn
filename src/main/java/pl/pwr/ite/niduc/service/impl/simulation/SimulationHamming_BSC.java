@@ -11,12 +11,12 @@ public class SimulationHamming_BSC {
 
     public static void main(String[] args) {
         String message = "this is important information that should be kept secret";
-        int numSimulations = 1;
+        int numSimulations = 10;
 
         List<Double> avgPercentBitsCorrectionValues = new ArrayList<>();
         List<Double> avgPercentBitsAfterTransmissionValues = new ArrayList<>();
 
-        for (double ber = 0.05; ber <= 1.0; ber += 0.05) {
+        for (double ber = 0.005; ber <= 0.1; ber += 0.005) {
 
             // Inicjalizacja sum dla obliczenia średnich
             double totalPercentBitsAfterTransmission = 0;

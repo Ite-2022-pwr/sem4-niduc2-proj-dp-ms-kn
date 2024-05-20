@@ -125,7 +125,8 @@ public class BitRepetition {
         int repetitonFactor = 3;
 
         // Wiadomość do przesłania
-        String message = "this is important information that should be kept secret";
+        //String message = "this is important information that should be kept secret";
+        String message = "a";
         System.out.println("Original Message - string:");
         System.out.println(message);
         System.out.println();
@@ -143,7 +144,7 @@ public class BitRepetition {
         System.out.println();
 
         // Inicjalizacja parametrów kanału
-        double ber = 0.02;
+        double ber = 1.0;
         double pOfErrorWhenGood = 0.01;
         double pOfGoodToBad = 0.1;
         double pOfErrorWhenBad = 0.1;
@@ -184,5 +185,27 @@ public class BitRepetition {
         System.out.println("Decoded message - string:");
         System.out.println(decodedStr);
         System.out.println();
+
+        int bitsAfterTransmission = countDifferentBits(encodedMsg, transmittedMsg);
+        System.out.println("bits after transmition = " + bitsAfterTransmission);
+        double percentBitsAfterTransmission = (double) bitsAfterTransmission / encodedMsg.size() * 100;
+        System.out.println("after transmission = " + percentBitsAfterTransmission);
+
+        List<Integer> encodedDecoded = encode(decodedMessage, repetitonFactor);
+        int bitsAfterCorrection = countDifferentBits(encodedDecoded, encodedMsg);
+        System.out.println("bits after correction = " + bitsAfterCorrection);
+        System.out.println(encodedDecoded);
+        double percentBitsCorrection = ((double) bitsAfterTransmission - (double) bitsAfterCorrection) / (double) bitsAfterTransmission * 100;
+        System.out.println(percentBitsCorrection);
+    }
+
+    public static int countDifferentBits(List<Integer> original, List<Integer> received) {
+        int count = 0;
+        for (int i = 0; i < original.size(); i++) {
+            if (!original.get(i).equals(received.get(i))) {
+                count++;
+            }
+        }
+        return count;
     }
 }

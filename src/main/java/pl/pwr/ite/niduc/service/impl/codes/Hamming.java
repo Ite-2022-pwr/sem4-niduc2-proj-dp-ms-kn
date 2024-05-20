@@ -305,7 +305,7 @@ public class Hamming {
         System.out.println();
 
         // Inicjalizacja parametrów kanału
-        double ber = 0.02;
+        double ber = 0.0;
         double pOfErrorWhenGood = 0.01;
         double pOfGoodToBad = 0.1;
         double pOfErrorWhenBad = 0.1;

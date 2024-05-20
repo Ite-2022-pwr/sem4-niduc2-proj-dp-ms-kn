@@ -9,6 +9,8 @@ import pl.pwr.ite.niduc.service.impl.generator.NumberGeneratorImpl;
 import java.util.ArrayList;
 import java.util.List;
 
+import static pl.pwr.ite.niduc.service.impl.codes.BitRepetition.encode;
+
 public class BaseSimulation {
 
     public static List<Double> simulateBitRepetitionBSC(String originalMsgString, int repetitionFactor, double ber) {
@@ -62,10 +64,13 @@ public class BaseSimulation {
     }
 
     private static List<Double> analyzeResults(List<Integer> binMessage, List<Integer> encodedMsgBin, List<Integer> transmittedMsgBin, List<Integer> decodedMsgBin) {
+
         int bitsAfterTransmission = countDifferentBits(encodedMsgBin, transmittedMsgBin);
         double percentBitsAfterTransmission = (double) bitsAfterTransmission / encodedMsgBin.size() * 100;
-        int bitsAfterCorrection = countDifferentBits(binMessage, decodedMsgBin);
-        double percentBitsCorrection = ((double) bitsAfterTransmission - bitsAfterCorrection) / bitsAfterTransmission * 100;
+
+        List<Integer> encodedDecoded = Hamming.encode(decodedMsgBin);
+        int bitsAfterCorrection = countDifferentBits(encodedDecoded, encodedMsgBin);
+        double percentBitsCorrection = ((double) bitsAfterTransmission - (double) bitsAfterCorrection) / (double) bitsAfterTransmission * 100;
 
         List<Double> results = new ArrayList<>();
         results.add(percentBitsAfterTransmission);
