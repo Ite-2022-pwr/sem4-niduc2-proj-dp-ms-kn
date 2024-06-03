@@ -18,7 +18,7 @@ public class UltimateSimulationBitRepetition_Gilbert {
     static int repetitionFactor2 = 10;
     public static void main(String[] args) {
         String message = "this is important information that should be kept secret";
-        int numSimulations = 1;
+        int numSimulations = 10;
 
         List<List<Double>> avgPercentBitsAfterTransmissionValuesList = new ArrayList<>();
         List<List<Double>> avgPercentBitsCorrectionValuesList = new ArrayList<>();
@@ -27,12 +27,12 @@ public class UltimateSimulationBitRepetition_Gilbert {
             List<Double> avgPercentBitsAfterTransmissionValues = new ArrayList<>();
             List<Double> avgPercentBitsCorrectionValues = new ArrayList<>();
 
-            double pGoodToBad = 0.005;
-            double pBadToGood = 0.1;
-            double pErrorWhenGood = 0.005;
-            double pErrorWhenBad = 0.005;
+            double pGoodToBad = 0.05;
+            double pBadToGood = 1.0;
+            double pErrorWhenGood = 0.05;
+            double pErrorWhenBad = 0.05;
 
-            while(pGoodToBad <= 0.1 && pBadToGood >= 0.005 && pErrorWhenGood <= 0.1 && pErrorWhenBad <= 0.1) {
+            while(pGoodToBad <= 1.0 && pBadToGood >= 0.05 && pErrorWhenGood <= 1.0 && pErrorWhenBad <= 1.0) {
 
                 // Inicjalizacja sum dla obliczenia średnich
                 double totalPercentBitsAfterTransmission = 0;
@@ -56,10 +56,10 @@ public class UltimateSimulationBitRepetition_Gilbert {
                 System.out.println("Procent zdolnosci naprawiania bledow: " + avgPercentBitsCorrection + "%");
                 System.out.println();
 
-                pGoodToBad += 0.005;
-                pBadToGood -= 0.005;
-                pErrorWhenGood += 0.005;
-                pErrorWhenBad += 0.005;
+                pGoodToBad += 0.05;
+                pBadToGood -= 0.05;
+                pErrorWhenGood += 0.05;
+                pErrorWhenBad += 0.05;
             }
 
             avgPercentBitsAfterTransmissionValuesList.add(avgPercentBitsAfterTransmissionValues);

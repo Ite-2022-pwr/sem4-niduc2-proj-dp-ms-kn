@@ -18,7 +18,7 @@ public class UltimateSimulationBitRepetition_BSC {
     static int repetitionFactor2 = 10;
     public static void main(String[] args) {
         String message = "this is important information that should be kept secret";
-        int numSimulations = 1;
+        int numSimulations = 10;
 
         List<List<Double>> avgPercentBitsAfterTransmissionValuesList = new ArrayList<>();
         List<List<Double>> avgPercentBitsCorrectionValuesList = new ArrayList<>();
@@ -27,7 +27,7 @@ public class UltimateSimulationBitRepetition_BSC {
             List<Double> avgPercentBitsAfterTransmissionValues = new ArrayList<>();
             List<Double> avgPercentBitsCorrectionValues = new ArrayList<>();
 
-            for (double ber = 0.005; ber <= 0.1; ber += 0.005) {
+            for (double ber = 0.05; ber <= 1.0; ber += 0.05) {
 
                 // Inicjalizacja sum dla obliczenia średnich
                 double totalPercentBitsAfterTransmission = 0;
